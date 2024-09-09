@@ -3,7 +3,7 @@ from core.models import Book
 from django.utils.dateparse import parse_date
 from django.db import IntegrityError
 
-file_path = '/Users/sm/Downloads/Amazon_popular_books_dataset.csv'
+file_path = '/Users/sm/Desktop/cleaned_amazon_books.csv'
 
 def load_books():
     with open(file_path, newline='', encoding='utf-8') as csvfile:

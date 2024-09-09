@@ -3,6 +3,6 @@ from django.contrib import admin
 from .models import Book
 
 @admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'final_price', 'availability_status')
+class BookA(admin.ModelAdmin):
+    list_display = ('title', 'author')
 
