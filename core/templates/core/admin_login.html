@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/css/admin_login.css' %}">
+    <title>Admin Login</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'js/admin_login.js' %}"></script>
+</head>
+
+<body>
+    <h1 id="portal">Online Library Portal</h1>
+    <hr>
+    <button id="back_button" onclick="location.href='{% url 'index' %}'">Back</button>
+    <div class="login-page">
+        <div class="form">
+            <hr>
+            <h3>Admin Authentication</h3>
+            <hr>
+            <br>
+            <!-- Updated login form -->
+            <form class="login-form" method="POST" action="{% url 'admin_login' %}">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="username" required/>
+                <input type="password" name="password" placeholder="password" required/>
+                <button type="submit">Login</button>
+            </form>
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+</body>
+</html>
