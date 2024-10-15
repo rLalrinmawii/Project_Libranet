@@ -1,4 +1,3 @@
-// Ensure jQuery is loaded
 $(document).ready(function() {
     // Web app's Firebase configuration
     var firebaseConfig = {
@@ -28,7 +27,9 @@ $(document).ready(function() {
     // Check if user is logged in
     auth.onAuthStateChanged(user => {
         if (user) {
-            window.location = 'user_portal.html'; // Redirect to user portal if logged in
+            // If the user is logged in, redirect to the user portal (if needed)
+            // Commenting out if you don't want to redirect to user portal at login
+            // window.location = '/user-portal/'; // Uncomment if needed
         }
     });
 
@@ -50,7 +51,7 @@ function logout() {
     
     auth.signOut().then(function() {
         console.log("Logout successful");
-        window.location = 'usr_login.html'; // Redirect to login page
+        window.location.href = '/user-login/'; // Redirect to login page
     }).catch(function(error) {
         console.error("Error during logout:", error);
     });
@@ -86,8 +87,8 @@ function register_me() {
                     })
                     .then(() => {
                         console.log("User data successfully written to Firestore!");
-                        // Redirect to user portal or another page after successful registration
-                        window.location.href = 'user_portal.html'; // Adjust URL as needed
+                        // Redirect to user login page after successful registration
+                        window.location.href = '/user-login/'; // Adjust URL as needed
                     })
                     .catch((error) => {
                         console.error("Error during registration:", error);
@@ -109,7 +110,7 @@ function login() {
         .then((userCredential) => {
             // Successfully logged in
             console.log("User logged in:", userCredential.user);
-            window.location.href = 'user_portal.html'; // Redirect after successful login
+            window.location.href = '/user-login/'; // Redirect to user login page
         })
         .catch((error) => {
             // Handle Errors here.
