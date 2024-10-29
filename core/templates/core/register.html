@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {% load static %}
+    <!-- <link rel="stylesheet" href="{% static 'core/css/usr_login.css' %}"/> -->
+    <title>Register - Online Library Portal</title>
+</head>
+<body>
+    <h1 id="portal">Online Library Portal</h1>
+    <hr>
+    <button id="back_button" onclick="location.href='{% url 'index' %}'">Back</button>
+
+    <div class="login-page">
+        <div class="form">
+            <hr>
+            <h3>Register</h3>
+            <hr>
+            <form class="register-form" method="POST" id="register-form" action="{% url 'user:register' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="text" placeholder="Name" name="usr_name" id="usr_name" required/>
+                <input type="password" placeholder="Password" name="usr_pass" id="usr_pass" required/>
+                <input type="text" placeholder="Roll Number" name="usr_roll" id="usr_roll" required/>
+                <input type="date" placeholder="dd/mm/yyyy" name="usr_dob" id="usr_dob" required/>
+                <input type="email" placeholder="Email address" name="usr_email" id="usr_email" required/>
+                <button type="submit" id="register_new">REGISTER</button>
+                <p class="message">Already registered? <a href="{% url 'user:user_login' %}">Sign In</a></p>
+            </form>
+            <!-- Display messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">{{ message }}</div>
+                    {% if message.tags == 'success' %}
+                        <script>alert("{{ message }}");</script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

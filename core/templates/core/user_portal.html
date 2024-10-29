@@ -1,57 +1,165 @@
-<html>
-    <head>
-        <title>User Main page</title>
-        {%load static%}
-        <link rel="stylesheet" href="{% static 'css/user_main.css' %}">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script type="text/javascript" src="{% static 'js/user_main.js' %}">
-        </script>    
-    </head>
-    <body>
-        <div id="header-file">
-                    <div>
-                        <button class="BUTTON" id="log_button">LogOut</button>
-                    </div>
-                
-                    <div class=main_header>
-                        <div class="image_user">
-                            <!-- user image -->
-                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-                            width="75" height="75"
-                            viewBox="0 0 192 192"
-                            style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,192v-192h192v192z" fill="none"></path><path d="M96,192c-53.01934,0 -96,-42.98066 -96,-96v0c0,-53.01934 42.98066,-96 96,-96v0c53.01934,0 96,42.98066 96,96v0c0,53.01934 -42.98066,96 -96,96z" fill="#cccccc"></path><g fill="#666666"><g id="surface1"><path d="M96,40.32c-15.38812,0 -27.84,12.45188 -27.84,27.84c0,15.38813 12.45188,27.84 27.84,27.84c15.38813,0 27.84,-12.45187 27.84,-27.84c0,-15.38812 -12.45187,-27.84 -27.84,-27.84zM75.3375,105.7875c-26.29031,7.96594 -35.0175,29.58 -35.0175,29.58v16.3125h111.36v-16.3125c0,0 -8.72719,-21.61406 -35.0175,-29.58c-1.44094,10.14094 -10.14094,18.0525 -20.6625,18.0525c-10.52156,0 -19.22156,-7.91156 -20.6625,-18.0525z"></path></g></g></g></svg>
-                            <h4>My Profile</h4>
-                        </div>
-                    
-                        <div class="heading">
-                                <h1 id="portal">Online Library (User) Portal</h1>
-                        </div>
-                    </div>
-            
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Main Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/user_main.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/user_main.js' %}"></script>    
+</head>
+<body>
+    <div id="header-file">
+        <div>
+            <button class="BUTTON" id="log_button">Log Out</button>
         </div>
-        <hr>
+        <div class="main_header">
+            <div class="image_user">
+                <!-- User profile image -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" viewBox="0 0 192 192" style="fill:#000000;">
+                    <g fill="none"><path d="M0,192v-192h192v192z" fill="none"></path><g fill="#666666"><path d="M96,40.32c-15.38812,0 -27.84,12.45188 -27.84,27.84c0,15.38813 12.45188,27.84 27.84,27.84c15.38813,0 27.84,-12.45187 27.84,-27.84c0,-15.38812 -12.45187,-27.84 -27.84,-27.84zM75.3375,105.7875c-26.29031,7.96594 -35.0175,29.58 -35.0175,29.58v16.3125h111.36v-16.3125c0,0 -8.72719,-21.61406 -35.0175,-29.58c-1.44094,10.14094 -10.14094,18.0525 -20.6625,18.0525c-10.52156,0 -19.22156,-7.91156 -20.6625,-18.0525z"></path></g></g>
+                </svg>
+                <h4>My Profile</h4>
+            </div>
+            <div class="heading">
+                <h1 id="portal">Online Library (User) Portal</h1>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div id="sidebar">
+        <button onclick="openDashboard()">User Dashboard</button>
+    </div>
+
+    <div id="main-content">
+        <!-- Search bar for filtering books -->
+        <div class="search-bar">
+            <input type="text" id="book-search" placeholder="Search books..." oninput="filterBooks()">
+        </div>
 
         <div id="blocks">
-            
-            <div class="left" id="Result">  
+            <!-- Left panel displaying book list with bookmark option -->
+            <div class="left" id="Result">
                 <h1>Books</h1>
                 <ul id="books">
+                    <!-- Book items will be dynamically loaded here -->
                 </ul>
             </div>
-    
-            <div class="right" id="about">  
+
+            <!-- Right panel for user profile information -->
+            <div class="right" id="about">
                 <h1>User Profile</h1>
                 <div id="about_me">
+                    <!-- Display editable profile information -->
+                    <form id="profile-form">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" value="User Name" required>
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" value="user@example.com" required>
+                        <label for="dob">Date of Birth:</label>
+                        <input type="date" id="dob" name="dob">
+                        <button type="button" onclick="saveProfile()">Save Changes</button>
+                    </form>
                 </div>
             </div>
-
         </div>
+    </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
 
-                <!-- The core Firebase JS SDK is always required and must be listed first -->
-<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+    <!-- JavaScript for handling search, bookmarks, and profile -->
+    <script>
+        // Sample data for books (replace with data from the backend)
+        const books = [
+            { id: 1, title: "Book One", author: "Author A" },
+            { id: 2, title: "Book Two", author: "Author B" },
+            { id: 3, title: "Book Three", author: "Author C" },
+            // Add more books as needed
+        ];
 
-    </body>
+        // Function to load books into the list
+        function loadBooks() {
+            const bookList = document.getElementById("books");
+            bookList.innerHTML = "";  // Clear existing books
+
+            books.forEach(book => {
+                const li = document.createElement("li");
+                li.innerHTML = `${book.title} by ${book.author} <button onclick="bookmarkBook(${book.id})">Bookmark</button>`;
+                bookList.appendChild(li);
+            });
+        }
+
+        // Function to filter books based on search input
+        function filterBooks() {
+            const query = document.getElementById("book-search").value.toLowerCase();
+            const filteredBooks = books.filter(book => 
+                book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query)
+            );
+            displayBooks(filteredBooks);
+        }
+
+        // Function to display a filtered list of books
+        function displayBooks(bookList) {
+            const booksElement = document.getElementById("books");
+            booksElement.innerHTML = "";  // Clear existing books
+
+            bookList.forEach(book => {
+                const li = document.createElement("li");
+                li.innerHTML = `${book.title} by ${book.author} <button onclick="bookmarkBook(${book.id})">Bookmark</button>`;
+                booksElement.appendChild(li);
+            });
+        }
+
+        // Function to bookmark a book
+        function bookmarkBook(bookId) {
+            alert("Book " + bookId + " bookmarked!");
+            // Save bookmark to backend if required
+        }
+
+        // Function to open user dashboard
+        function openDashboard() {
+            alert("Opening User Dashboard...");
+            // Load user dashboard content or redirect if necessary
+        }
+
+        // Function to save user profile changes
+        function saveProfile() {
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const dob = document.getElementById("dob").value;
+            alert("Profile updated!");
+            // Save profile data to backend if required
+        }
+
+        // Load books on page load
+        document.addEventListener("DOMContentLoaded", loadBooks);
+    </script>
+
+    <style>
+        /* Add some styling for sidebar and main content layout */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200px;
+            background-color: #f4f4f4;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        #main-content {
+            margin-left: 220px;  /* Adjust for sidebar */
+            padding: 20px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+    </style>
+</body>
 </html>

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'user',
     'rest_framework',
     'django.contrib.postgres',
 ]
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'libranet.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,7 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'libranet.wsgi.application'
 
-AUTH_USER_MODEL = 'core.CustomUser'  # Ensure 'core' matches your app name
+AUTH_USER_MODEL = 'user.CustomUser'  # Ensure 'core' matches your app name
 
 
 

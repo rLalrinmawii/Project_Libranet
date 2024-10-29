@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libranet</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <!-- Header section with login/logout -->
+    <header>
+        <div class="header-content">
+            <h1>Book Library</h1>
+            <div class="auth-links">
+                {% if user.is_authenticated %}
+                    <span>Welcome, {{ user.username }}!</span>
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'index' %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <section class="search-bar">
+        <form method="get" action="{% url 'homepage' %}">
+            <input type="text" name="query" placeholder="Search books by title, author, or any field" value="{{ request.GET.query }}">
+            <button type="submit">Search</button>
+        </form>
+    </section>
+
+    <!-- Book List -->
+    <section class="book-list">
+        <h2>Book Collection</h2>
+        {% if books %}
+            <div class="books-grid">
+                {% for book in books %}
+                    <div class="book-item">
+                        <div class="book-cover">
+                            {% if book.image_url %}
+                                <img src="{{ book.image_url }}" alt="{{ book.title }}">
+                            {% else %}
+                                <img src="{% static 'images/default_cover.jpg' %}" alt="No cover available">
+                            {% endif %}
+                        </div>
+                        <div class="book-details">
+                            <h3>{{ book.title }}</h3>
+                            <p><strong>Author:</strong> {{ book.author }}</p>
+                            <p><strong>Rating:</strong> {{ book.rating|default:"N/A" }}</p>
+                            <p><strong>Availability:</strong> {{ book.availability|yesno:"Available,Not Available" }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-results">No books found matching your search criteria.</p>
+        {% endif %}
+    </section>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if is_paginated %}
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1&query={{ request.GET.query }}">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}&query={{ request.GET.query }}">Previous</a>
+                {% endif %}
+                
+                <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&query={{ request.GET.query }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}&query={{ request.GET.query }}">Last</a>
+                {% endif %}
+            </span>
+        {% endif %}
+    </div>
+
+</body>
+</html>
