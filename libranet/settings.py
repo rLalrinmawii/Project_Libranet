@@ -130,12 +130,22 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'core' / 'static',]
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # or any directory you'd like for collected static files
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# settings.py
+LOGOUT_REDIRECT_URL = 'homepage' # Redirect to homepage after logout
+LOGIN_REDIRECT_URL = 'homepage'
 handler404 = 'core.views.error_404'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    # Add any other backends here if used
+]
+
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds, adjust if necessary
