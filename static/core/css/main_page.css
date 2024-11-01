@@ -1,0 +1,131 @@
+/* Basic Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+  font-family: Arial, sans-serif;
+  background-image: url("{% static 'core/images/library.jpg' %}");
+ /* Add background image */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;  /* Keeps the image fixed during scroll */
+  color: #333;
+  text-align: center;
+}
+
+/* Header Styling */
+#portal {
+  font-size: 3em;
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  color: #fff;  /* Change color for contrast with background */
+  margin-top: 1em;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);  /* Add subtle shadow for readability */
+}
+
+/* Navbar Styling */
+.navbar {
+  background-color: rgba(59, 89, 152, 0.9);  /* Semi-transparent for a softer look */
+  padding: 1em;
+  color: #fff;
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.homepage-button {
+  background-color: #444;
+  color: #fff;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s;
+}
+
+.homepage-button:hover {
+  background-color: #666;
+}
+
+/* Main User Block Styling */
+.main_user_block {
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.9);  /* Semi-transparent background for readability */
+  padding: 20px;
+  border: 2px solid #ccc;
+  color: #333;
+  width: 25%;
+  min-height: 300px;
+  text-align: center;
+  display: inline-block;
+  margin: 2em auto;
+  border-radius: 8px;
+  position: fixed;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#admin {
+  top: 50%;
+  left: 25%;
+}
+
+#user {
+  top: 50%;
+  left: 50%;
+}
+
+.main_user_block svg {
+  margin-bottom: 1em;
+}
+
+/* Login Button Styling */
+.login_button {
+  background-color: #3b5998;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 15px 25px;
+  text-align: center;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.login_button:hover {
+  background-color: #2d4373;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main_user_block {
+    width: 70%;
+    position: static;
+    transform: none;
+    margin: 20px auto;
+  }
+
+  #admin, #user {
+    top: auto;
+    left: auto;
+    margin-bottom: 20px;
+  }
+
+  .navbar-content {
+    flex-direction: column;
+  }
+
+  .homepage-button {
+    margin-top: 10px;
+  }
+}

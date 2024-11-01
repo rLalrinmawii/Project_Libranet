@@ -3,13 +3,158 @@
 <head>
     <meta charset="utf-8">
     {% load static %}
-    <!-- <link rel="stylesheet" href="{% static 'core/css/usr_login.css' %}"/> -->
     <title>Register - Online Library Portal</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            text-align: center;
+            height: 100vh; /* Full height */
+            background-image: url('{% static 'core/images/library.jpg' %}'); /* Background image */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Prevent scrollbars */
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative; /* For positioning overlay and navbar */
+        }
+
+        /* Overlay for Faded Background */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Adjusted opacity for more fading */
+            z-index: 1; /* Ensure this is higher than the background image */
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: rgba(91, 77, 67, 0.9); /* Slight transparency */
+            padding: 1em;
+            color: #fff;
+            z-index: 3; /* Keep above the overlay */
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Left and right alignment */
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5em;
+            text-align: left;
+        }
+
+        .homepage-button {
+            background: #4e8ad1;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .homepage-button:hover {
+            background: #3b5998;
+        }
+
+        /* Centered Container for Login Blocks */
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 80px); /* Adjust height to account for navbar */
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Main User Block Styling */
+        .form {
+            width: 700px; /* Set a fixed width for the form */
+            height: 600px;
+            padding: 40px;
+            margin: 10px;
+            background: rgba(255, 255, 255, 0.8); /* Slightly transparent background */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        /* Input Field Styling */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%; /* Full width */
+            height: 40px; /* Increased height */
+            font-size: 16px; /* Increased font size */
+            margin-bottom: 15px; /* Spacing between input fields */
+            padding: 10px; /* Padding inside the input fields */
+            border: 1px solid #ccc; /* Border style */
+            border-radius: 5px; /* Rounded corners */
+            transition: border 0.3s ease; /* Transition effect for border */
+        }
+        input[type="text"]#first_name {
+            margin-top: 20px; /* Space before the first input text box */
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="date"]:focus {
+            border-color: #4e8ad1; /* Change border color on focus */
+            outline: none; /* Remove default outline */
+        }
+
+        /* Beautified Register Button Styling */
+        #register_new {
+            background: linear-gradient(135deg, #3b5998, #4e8ad1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        #register_new:hover {
+            background: linear-gradient(135deg, #2d4373, #3b5998);
+        }
+
+        /* Message alert styles */
+        .alert {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
-    <h1 id="portal">Online Library Portal</h1>
-    <hr>
-    <button id="back_button" onclick="location.href='{% url 'index' %}'">Back</button>
+    <div class="navbar">
+        <h1>Online Library Portal</h1>
+        <button id="back_button" class="homepage-button" onclick="location.href='{% url 'index' %}'">Back</button>
+    </div>
 
     <div class="login-page">
         <div class="form">
@@ -18,12 +163,13 @@
             <hr>
             <form class="register-form" method="POST" id="register-form" action="{% url 'user:register' %}">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <input type="text" placeholder="Name" name="usr_name" id="usr_name" required/>
-                <input type="password" placeholder="Password" name="usr_pass" id="usr_pass" required/>
+                <input type="text" placeholder="First Name" name="first_name" id="first_name" required/>
+                <input type="text" placeholder="Last Name" name="last_name" id="last_name" required/>
+                <input type="text" placeholder="UserName" name="usr_name" id="usr_name" required/>
                 <input type="text" placeholder="Roll Number" name="usr_roll" id="usr_roll" required/>
-                <input type="date" placeholder="dd/mm/yyyy" name="usr_dob" id="usr_dob" required/>
+                <input type="date" placeholder="Date of Birth" name="usr_dob" id="usr_dob" required/>
                 <input type="email" placeholder="Email address" name="usr_email" id="usr_email" required/>
+                <input type="password" placeholder="Password" name="usr_pass" id="usr_pass" required/>
                 <button type="submit" id="register_new">REGISTER</button>
                 <p class="message">Already registered? <a href="{% url 'user:user_login' %}">Sign In</a></p>
             </form>

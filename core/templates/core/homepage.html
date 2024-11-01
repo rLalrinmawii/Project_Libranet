@@ -1,3 +1,12 @@
+<!-- Add this section at the top of homepage.html to display messages -->
+<!-- {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %} -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,32 +14,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Libranet</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
 </head>
 <body>
 
-    <!-- Header section with login/logout -->
-    <header>
-        <div class="header-content">
-            <h1>Book Library</h1>
-            <div class="auth-links">
-                {% if user.is_authenticated %}
-                    <span>Welcome, {{ user.username }}!</span>
-                    <a href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'index' %}">Login</a>
-                {% endif %}
-            </div>
-        </div>
-    </header>
-
-    <!-- Search Bar -->
-    <section class="search-bar">
-        <form method="get" action="{% url 'homepage' %}">
-            <input type="text" name="query" placeholder="Search books by title, author, or any field" value="{{ request.GET.query }}">
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-content">
+        <h1>Libranet</h1>
+        <form class="search-form" method="get" action="{% url 'homepage' %}">
+            <input type="text" name="query" placeholder="Search books..." value="{{ query }}">
             <button type="submit">Search</button>
         </form>
-    </section>
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <span>Welcome, Admin!</span>
+                {% else %}
+                    <span>Welcome, {{ user.username }}!</span>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+                
+            {% else %}
+                <a href="{% url 'index' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
 
     <!-- Book List -->
     <section class="book-list">
@@ -78,6 +91,16 @@
             </span>
         {% endif %}
     </div>
+    <!-- Previous and Next Page Buttons -->
+    <!-- <div class="page-navigation-buttons" style="text-align: center; margin-top: 20px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="button">Previous Page</a>
+        {% endif %}
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="button">View More Books</a>
+        {% endif %}
+    </div> -->
 
 </body>
 </html>
