@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Styling the tables and layout */
+        .books-table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .books-table th, .books-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .books-table th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .books-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .book-cover-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .book-cover-title img {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .finalize-button, .view-toggle-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            background-color: #007BFF;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .finalize-button:hover, .view-toggle-button:hover {
+            background-color: #0056b3;
+        }
+
+        .no-books-message {
+            text-align: center;
+            margin: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="{% url 'homepage' %}" class="back-button" style="color: white; font-size: 24px; text-decoration: none; margin-right: 16px;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Libranet</h1>
+            <button class="BUTTON" onclick="location.href='{% url 'homepage' %}'">Home</button>
+        </div>
+    </nav>
+
+    <!-- Cart Section -->
+    <section class="cart-section">
+        <h1 style = 'text-align: center;'> Your Cart</h1>
+        {% if borrowed_books %}
+            <table class="books-table">
+                <thead>
+                    <tr>
+                        <th>Book Cover & Title</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for borrowed_book in borrowed_books %}
+                        <tr data-book-asin="{{ borrowed_book.book.asin }}">
+                            <td class="book-cover-title">
+                                {% if borrowed_book.book.image_url %}
+                                    <img src="{{ borrowed_book.book.image_url }}" alt="{{ borrowed_book.book.title }}">
+                                {% else %}
+                                    <img src="{% static 'images/default_cover.jpg' %}" alt="No cover available">
+                                {% endif %}
+                                <strong>{{ borrowed_book.book.title }}</strong>
+                            </td>
+                            <td>
+                                <button class="remove-button" onclick="removeBook('{{ borrowed_book.book.asin }}')">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                                <!-- <button class="return-button" onclick="returnBook('{{ borrowed_book.book.asin }}')">
+                                    <i class="fas fa-undo"></i> Return
+                                </button>
+                            </td> -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Form for Finalizing Borrow -->
+            <form method="POST" action="{% url 'finalize_borrow' %}">
+                {% csrf_token %}
+                <button type="submit" class="finalize-button">
+                    Finalize Borrow
+                </button>
+            </form>
+        {% else %}
+            {% if finalized_books %}
+                <p class="no-books-message">You have {{ finalized_books|length }} issued books.</p>
+            {% else %}
+                <p class="no-books-message">You have not borrowed any books.</p>
+            {% endif %}
+        {% endif %}
+    </section>
+
+    <!-- Finalized Books Section (Initially Hidden) -->
+    <section id="finalized-section" style="display: none;">
+        <h2>Your Finalized Books</h2>
+        <table id="finalized-books-table" class="books-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrow Date</th>
+                    <th>Return Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if finalized_books %}
+                    {% for finalized_book in finalized_books %}
+                        <tr data-book-asin="{{ finalized_book.book.asin }}">
+                            <td>{{ finalized_book.book.title }}</td>
+                            <td>{{ finalized_book.borrow_date|date:"Y-m-d" }}</td>
+                            <td>{{ finalized_book.return_date|date:"Y-m-d" }}</td>
+                            <td>
+                                <button class="return-button" onclick="returnFinalizedBook('{{ finalized_book.book.asin }}')">
+                                    <i class="fas fa-undo"></i> Return
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">No finalized books available.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Button to Toggle Between Cart and Finalized Views -->
+    <button onclick="toggleView()" class="view-toggle-button">View Finalized Books</button>
+
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+
+        function removeBook(asin) {
+            fetch(`/remove-borrowed-book/${asin}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Remove the book row from the cart immediately
+                    const bookRow = document.querySelector(`tr[data-book-asin="${asin}"]`);
+                    if (bookRow) {
+                        bookRow.remove(); // Remove the book row from the cart
+                    }
+                    alert("Book removed successfully.");
+                } else {
+                    alert("Failed to remove the book.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function returnBook(asin) {
+            fetch(`/return-borrowed-book/${asin}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Remove the book row from the cart immediately
+                    const bookRow = document.querySelector(`tr[data-book-asin="${asin}"]`);
+                    if (bookRow) {
+                        bookRow.remove(); // Remove the book row from the cart
+                    }
+                    alert("Book returned successfully.");
+                } else {
+                    alert(data.message || "Failed to return the book.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function returnFinalizedBook(asin) {
+    fetch(`/return-finalized-book/${asin}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            // Capture borrow_date and return_date from the data
+            const borrowDate = new Date(data.borrow_date);
+            const returnDate = new Date(data.return_date); // Assuming the backend sends return_date too
+            const today = new Date();
+            
+            // Calculate the overdue days (difference between return_date and borrow_date)
+            const fourteenDaysLater = new Date(borrowDate);
+            fourteenDaysLater.setDate(fourteenDaysLater.getDate() + 14);  // Add 14 days to borrowDate
+
+            let fineMessage = '';
+            let fineAmount = 0;
+            const finePerDay = 1; // Fine per day (e.g., $1 per day)
+
+            if (returnDate > fourteenDaysLater) {
+                // If the book is returned after the 14-day period
+                const diffTime = Math.abs(returnDate - fourteenDaysLater);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert ms to days
+
+                fineAmount = diffDays * finePerDay; // Calculate fine
+                fineMessage = `The book is overdue by ${diffDays} days. Your total fine is $${fineAmount}.`;
+            } else {
+                fineMessage = "No fine! Returned on time.";
+            }
+
+            // Show the fine message to the user
+            alert(fineMessage);
+
+            // Remove the book row from the finalized section
+            const bookRow = document.querySelector(`tr[data-book-asin="${asin}"]`);
+            if (bookRow) {
+                bookRow.remove(); // Remove the book row from the finalized books section
+            }
+        } else {
+            alert(data.message || "Failed to return the book.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+        function toggleView() {
+            const cartSection = document.querySelector('.cart-section');
+            const finalizedSection = document.getElementById('finalized-section');
+            const toggleButton = document.querySelector('.view-toggle-button');
+            
+            if (cartSection.style.display === 'none') {
+                cartSection.style.display = 'block';
+                finalizedSection.style.display = 'none';
+                toggleButton.innerText = "View Finalized Books";
+            } else {
+                cartSection.style.display = 'none';
+                finalizedSection.style.display = 'block';
+                toggleButton.innerText = "View Cart Books";
+            }
+        }
+    </script>
+</body>
+</html>

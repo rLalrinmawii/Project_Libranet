@@ -13,6 +13,7 @@ body {
 }
 
 /* Navbar Styling */
+
 .navbar {
     background-color: #3b5998;
     padding: 1em;
@@ -131,6 +132,35 @@ body {
     font-size: 0.9em;
     color: #555;
 }
+.book-item {
+    position: relative; /* Allow absolute positioning of child elements */
+    /* Other styles you may already have for book-item */
+}
+
+.bookmark-icon {
+    position: absolute; /* Position relative to the nearest positioned ancestor */
+    bottom: 10px; /* Distance from the bottom */
+    right: 10px; /* Distance from the right */
+    cursor: pointer; /* Show a pointer on hover */
+    color: #ffcc00; /* Color for the star icon, change as needed */
+    font-size: 24px; /* Size of the icon */
+    transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+.bookmark-icon:hover {
+    color: #ffd700; /* Change color on hover for better visual feedback */
+}
+.bookmark-link {
+    color: #FFD700; /* Gold color for the filled star */
+    font-size: 1.5rem;
+    margin-left: 10px;
+    text-decoration: none;
+}
+
+.bookmark-link:hover {
+    color: #FFA500; /* Slightly darker color on hover */
+}
+
 
 /* Pagination Styling */
 .pagination {

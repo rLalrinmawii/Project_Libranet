@@ -1,0 +1,129 @@
+<!-- bookmarked_books.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favourites</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+</head>
+<body>
+    <nav  class="navbar" style="display: flex; align-items: center; padding: 10px;">
+        <div  style="display: flex; align-items: center; margin-right: auto;" >
+            <a href="{% url 'homepage' %}" class="back-button" style="color: white; font-size: 24px; text-decoration: none; margin-right: 16px;">
+                <i class="fas fa-arrow-left"></i> <!-- White arrow icon -->
+            </a>
+            <h1 style="margin: 0;">Favourites</h1>
+            <!-- <div class="auth-links" style="margin-left: auto;">
+                {% if user.is_authenticated %}
+                    <span> {{ user.username }}!</span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'index' %}">Login</a>
+                {% endif %}
+            </div> -->
+            
+        </div>
+    </nav>
+
+    <section class="book-list">
+        <!-- <h2>Your Bookmarked Books</h2> -->
+        {% if books %}
+            <div class="books-grid">
+                {% for book in books %}
+                    <div class="book-item">
+                        <div class="book-cover">
+                            <img src="{{ book.image_url }}" alt="{{ book.title }}">
+                        </div>
+                        <div class="book-details" style="position: relative; padding: 20px; padding-bottom: 60px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; overflow: hidden;">
+                            <h3>{{ book.title }}</h3>
+                            <p><strong>Author:</strong> {{ book.author }}</p>
+                            <p><strong>Rating:</strong> {{ book.rating|default:"N/A" }}</p>
+                            <p><strong>Availability:</strong> {{ book.availability|yesno:"Available,Not Available" }}</p>
+                            {% if user.is_authenticated and book.is_available and not user.is_staff %}
+                            
+                            <form method="post" action="{% url 'borrow_book' book.asin %}" style="position: absolute; bottom: 10px; left: 10px;" onsubmit="return toggleButtonText(event)">
+                            {% csrf_token %}
+                            <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                                Borrow
+                            </button>
+                            </form>
+                            {% endif %}
+                            <a href="#" class="bookmark-icon" data-book-id="{{ book.asin }}">
+                                <i class="fas fa-star"></i> <!-- Filled star icon -->
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have no bookmarked books.</p>
+        {% endif %}
+    </section>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token }}'; // CSRF token for requests
+            const bookmarkIcons = document.querySelectorAll('.bookmark-icon');
+        
+            bookmarkIcons.forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const bookId = this.getAttribute('data-book-id');
+                    const starIcon = this.querySelector('i');
+                    const isBookmarked = starIcon.classList.contains('fas'); // Check if currently bookmarked
+        
+                    // Toggle icon immediately for visual feedback
+                    starIcon.classList.toggle('far');
+                    starIcon.classList.toggle('fas');
+        
+                    // Use POST method with _method flag to indicate DELETE if necessary
+                    const methodType = isBookmarked ? 'DELETE' : 'POST';
+        
+                    fetch(`/bookmark/${bookId}/`, {
+                        method: 'POST', // Always use POST
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ _method: methodType }) // Pass actual method as _method
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // If the request fails, revert the icon back
+                            console.error('Failed to bookmark/unbookmark the book.');
+                            starIcon.classList.toggle('far');
+                            starIcon.classList.toggle('fas');
+                        }
+                    })
+                    .catch(error => {
+                        // Handle network errors and revert the icon back
+                        console.error('Network error:', error);
+                        starIcon.classList.toggle('far');
+                        starIcon.classList.toggle('fas');
+                    });
+                });
+            });
+        });
+        function toggleButtonText(button) {
+        // Check the current text of the button
+        if (button.textContent.trim() === "Borrow") {
+            // Change to "Added to Cart" if it's currently "Borrow"
+            button.textContent = "Added to Cart";
+            button.style.backgroundColor = "gray";
+        } else {
+            // Change back to "Borrow" if it's currently "Added to Cart"
+            button.textContent = "Borrow";
+            button.style.backgroundColor = "#007bff";
+        }
+        return false;  // Prevents form submission for demo purposes
+    }
+    </script>         
+    
+</body>
+</html>

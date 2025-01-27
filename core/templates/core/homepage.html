@@ -1,12 +1,3 @@
-<!-- Add this section at the top of homepage.html to display messages -->
-<!-- {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-{% endif %} -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,8 +6,54 @@
     <title>Libranet</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .recommender-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .recommender-button button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        .recommender-button button:hover {
+            background-color: #0056b3;
+        }
+        .auth-links .admin-portal-button {
+    color: #fff;
+    text-decoration: none;
+    background-color: #52a7ee; /* Orange background for visibility */
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.auth-links .admin-portal-button:hover {
+    background-color: #006fe6; /* Darker shade on hover */
+}
+    </style>
 </head>
 <body>
+
+<!-- Add this section at the top of homepage.html to display messages
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div> -->
+<!-- {% endif %} -->
 
 <!-- Navigation Bar -->
 <nav class="navbar">
@@ -30,14 +67,22 @@
             {% if user.is_authenticated %}
                 {% if user.is_superuser %}
                     <span>Welcome, Admin!</span>
+                    <a href="{% url 'admin_portal' %}" class="admin-portal-button">Admin Portal</a>
                 {% else %}
                     <span>Welcome, {{ user.username }}!</span>
+                {% endif %}
+                {% if not user.is_staff %}
+                    <a href="{% url 'bookmarked_books' %}" class="bookmark-link">
+                        <i class="fas fa-star"></i>
+                    </a>
+                {% endif %}
+                {% if user.is_authenticated and not user.is_staff %}
+                    <a href="{% url 'borrowed_books' %}">Cart</a>
                 {% endif %}
                 <form method="post" action="{% url 'logout' %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit">Logout</button>
                 </form>
-                
             {% else %}
                 <a href="{% url 'index' %}">Login</a>
             {% endif %}
@@ -45,62 +90,194 @@
     </div>
 </nav>
 
-    <!-- Book List -->
-    <section class="book-list">
-        <h2>Book Collection</h2>
-        {% if books %}
-            <div class="books-grid">
-                {% for book in books %}
-                    <div class="book-item">
-                        <div class="book-cover">
-                            {% if book.image_url %}
-                                <img src="{{ book.image_url }}" alt="{{ book.title }}">
-                            {% else %}
-                                <img src="{% static 'images/default_cover.jpg' %}" alt="No cover available">
-                            {% endif %}
-                        </div>
-                        <div class="book-details">
-                            <h3>{{ book.title }}</h3>
-                            <p><strong>Author:</strong> {{ book.author }}</p>
-                            <p><strong>Rating:</strong> {{ book.rating|default:"N/A" }}</p>
-                            <p><strong>Availability:</strong> {{ book.availability|yesno:"Available,Not Available" }}</p>
-                        </div>
+<!-- Book List -->
+<section class="book-list">
+    <h2>Book Collection</h2>
+    {% if books %}
+        <div class="books-grid">
+            {% for book in books %}
+                <div class="book-item">
+                    <div class="book-cover">
+                        {% if book.image_url %}
+                            <img src="{{ book.image_url }}" alt="{{ book.title }}">
+                        {% else %}
+                            <img src="{% static 'images/default_cover.jpg' %}" alt="No cover available">
+                        {% endif %}
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="no-results">No books found matching your search criteria.</p>
-        {% endif %}
-    </section>
+                    <div class="book-details" style="position: relative; padding: 20px; padding-bottom: 60px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; overflow: hidden;">
+                        <h3>{{ book.title }}</h3>
+                        <p><strong>Author:</strong> {{ book.author }}</p>
+                        <p><strong>Rating:</strong> {{ book.rating|default:"N/A" }}</p>
+                        <p><strong>Availability:</strong> {% if book.is_available %} Available {% else %} Not Available {% endif %}</p>
 
-    <!-- Pagination -->
-    <div class="pagination">
-        {% if is_paginated %}
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1&query={{ request.GET.query }}">First</a>
-                    <a href="?page={{ page_obj.previous_page_number }}&query={{ request.GET.query }}">Previous</a>
-                {% endif %}
-                
-                <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&query={{ request.GET.query }}">Next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}&query={{ request.GET.query }}">Last</a>
-                {% endif %}
-            </span>
-        {% endif %}
-    </div>
-    <!-- Previous and Next Page Buttons -->
-    <!-- <div class="page-navigation-buttons" style="text-align: center; margin-top: 20px;">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="button">Previous Page</a>
-        {% endif %}
-        
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}" class="button">View More Books</a>
-        {% endif %}
-    </div> -->
+                        {% if user.is_authenticated and book.is_available and not user.is_staff %}
+                        <form method="post" action="{% url 'borrow_book' book.asin %}" style="position: absolute; bottom: 10px; left: 10px;" onsubmit="return toggleButtonText(event, '{{ book.asin }}')">
+                        {% csrf_token %}
+                        <button type="submit" class="borrow-button" style="padding: 10px 20px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;" id="borrow-button-{{ book.asin }}">
+                            Borrow
+                        </button>
+                        </form>
+                        <button type="button" class="remove-button" style="padding: 10px 20px; background-color: red; color: #fff; border: none; border-radius: 5px; cursor: pointer; display: none;" id="remove-button-{{ book.asin }}" onclick="removeFromCart('{{ book.asin }}')">
+                            Remove from Cart
+                        </button>
+                        {% endif %}
+                        <!-- Bookmark Button -->
+                        {% if user.is_authenticated and not user.is_staff %}
+                        <span class="bookmark-icon" data-book-id="{{ book.asin }}">
+                            <i class="{% if book.is_bookmarked %}fas{% else %}far{% endif %} fa-star"></i>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-results">No books found matching your search criteria.</p>
+    {% endif %}
+</section>
+
+<!-- Pagination -->
+<div class="pagination">
+    {% if is_paginated %}
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&query={{ request.GET.query }}">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&query={{ request.GET.query }}">Previous</a>
+            {% endif %}
+            
+            <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&query={{ request.GET.query }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&query={{ request.GET.query }}">Last</a>
+            {% endif %}
+        </span>
+    {% endif %}
+</div>
+<!-- Book Recommender Button -->
+<div class="recommender-button">
+    <button onclick="window.location.href='{% url 'chatbot' %}'">📚 Book Recommender</button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = '{{ csrf_token }}'; // CSRF token for requests
+        const bookmarkIcons = document.querySelectorAll('.bookmark-icon');
+
+        // Load borrowed books state from localStorage
+        const borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+
+        // Update button states based on borrowed books in localStorage
+        borrowedBooks.forEach(bookId => {
+            const button = document.getElementById(`borrow-button-${bookId}`);
+            const removeButton = document.getElementById(`remove-button-${bookId}`);
+            if (button) {
+                button.textContent = "Added to Cart";
+                button.style.backgroundColor = "gray"; // Change button color to indicate it's borrowed
+                button.disabled = true; // Disable the button if already borrowed
+            }
+            if (removeButton) {
+                removeButton.style.display = "inline-block"; // Show remove button
+            }
+        });
+
+        bookmarkIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+                const bookId = this.getAttribute('data-book-id');
+                const starIcon = this.querySelector('i');
+                const isBookmarked = starIcon.classList.contains('fas'); // Check if currently bookmarked
+
+                // Toggle icon immediately for visual feedback
+                starIcon.classList.toggle('far');
+                starIcon.classList.toggle('fas');
+
+                // Use POST method with _method flag to indicate DELETE if necessary
+                const methodType = isBookmarked ? 'DELETE' : 'POST';
+
+                fetch(`/bookmark/${bookId}/`, {
+                    method: 'POST', // Always use POST
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ _method: methodType }) // Pass actual method as _method
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // If the request fails, revert the icon back
+                        console.error('Failed to bookmark/unbookmark the book.');
+                        starIcon.classList.toggle('far');
+                        starIcon.classList.toggle('fas');
+                    }
+                })
+                .catch(error => {
+                    // Handle network errors and revert the icon back
+                    console.error('Network error:', error);
+                    starIcon.classList.toggle('far');
+                    starIcon.classList.toggle('fas');
+                });
+            });
+        });
+    });
+
+    function toggleButtonText(event, bookId) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const form = event.target; // Get the form
+        const button = form.querySelector('button'); // Get the button
+
+        // Load borrowed books from local storage
+        let borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+
+        // Check if the book has already been borrowed
+        if (borrowedBooks.includes(bookId)) {
+            alert('This book is already in your cart.'); // Alert user
+            return false; // Prevent further action
+        }
+
+        // Change button text and style
+        button.textContent = "Added to Cart";
+        button.style.backgroundColor = "gray"; // Change button color
+        button.disabled = true; // Disable the button to prevent further clicks
+
+        // Save to localStorage
+        borrowedBooks.push(bookId);
+        localStorage.setItem('borrowedBooks', JSON.stringify(borrowedBooks));
+
+        // Show the remove button
+        document.getElementById(`remove-button-${bookId}`).style.display = "inline-block";
+
+        // Submit the form after a slight delay for UI feedback
+        setTimeout(() => {
+            form.submit(); // Proceed with the actual form submission
+        }, 500); // Delay to show the text change
+
+        return false; // Prevent immediate form submission
+    }
+
+    function removeFromCart(bookId) {
+        // Load borrowed books from local storage
+        let borrowedBooks = JSON.parse(localStorage.getItem('borrowedBooks')) || [];
+
+        // Remove the book from the array
+        borrowedBooks = borrowedBooks.filter(id => id !== bookId);
+        localStorage.setItem('borrowedBooks', JSON.stringify(borrowedBooks));
+
+        // Reset button text and state
+        const button = document.getElementById(`borrow-button-${bookId}`);
+        if (button) {
+            button.textContent = "Borrow"; // Reset button text
+            button.style.backgroundColor = "#007bff"; // Reset button color
+            button.disabled = false; // Re-enable the button
+        }
+
+        // Hide the remove button
+        const removeButton = document.getElementById(`remove-button-${bookId}`);
+        if (removeButton) {
+            removeButton.style.display = "none"; // Hide remove button
+        }
+    }
+</script>
 
 </body>
 </html>

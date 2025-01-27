@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Book Recommendation Chatbot</title>
+  {% load static %}
+
+  <style>
+    /* General page styling */
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url("{% static 'core/images/bg.jpg' %}");
+      background-size: cover; /* Ensures image covers the entire viewport */
+      background-position: center; /* Centers the image */
+      background-repeat: no-repeat; /* Prevents image from repeating */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    /* Chatbox styling */
+    .chatbox {
+      width: 100%;
+      max-width: 450px;
+      border-radius: 12px;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* Header styling */
+    .chatbox-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    /* Message area styling */
+    .messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      height: 300px;
+    }
+
+    /* Message styling */
+    .message {
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      padding: 8px;
+      border-radius: 5px;
+      max-width: 90%;
+    }
+
+    .message.user {
+      text-align: right;
+      font-weight: bold;
+      color: #00796b;
+      margin-left: auto;
+      background-color: #e0f2f1;
+    }
+
+    .message.bot {
+      text-align: left;
+      color: #555;
+      background-color: #e3f2fd;
+    }
+
+    /* Loading text styling */
+    .loading {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Input and button container styling */
+    .input-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    /* Input styling */
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    /* Button styling */
+    button {
+      padding: 12px 15px;
+      border: none;
+      background-color: #00796b;
+      color: #ffffff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    /* Back button styling */
+    .back-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background-color: #0288d1;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: #01579b;
+    }
+
+    /* Bottom-right GIF */
+    .bottom-right-gif {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: auto;
+      z-index: 10;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <button 
+    class="back-button" 
+    onclick="location.href='{% url 'homepage' %}'"
+  >Back</button>
+
+  <div class="chatbox">
+    <div class="chatbox-header">Book Recommender</div>
+    <div class="messages" id="chat-box">
+      <!-- Default message on load without affecting bot functionality -->
+      <div class="message bot">Hello! How may I help you?</div>
+    </div>
+    <div id="loading-indicator" class="loading" style="display: none">
+      Generating response...
+    </div>
+
+    <div class="input-container">
+      <input type="text" id="user-input" placeholder="Eg: Can you suggest a fantasy book..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <img
+    src="{% static 'core/images/hi-robot.gif' %}"
+    class="bottom-right-gif"
+    alt="Bottom Right GIF"
+  />
+
+  <script>
+    // Append user or bot message to the chat box
+    function appendMessage(content, sender) {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message", sender);
+      messageElement.innerHTML = content.replace(/\n/g, "<br>");
+      document.getElementById("chat-box").appendChild(messageElement);
+      document.getElementById("chat-box").scrollTop =
+        document.getElementById("chat-box").scrollHeight;
+    }
+
+    // Show loading indicator
+    function showLoading() {
+      document.getElementById("loading-indicator").style.display = "block";
+    }
+
+    // Hide loading indicator
+    function hideLoading() {
+      document.getElementById("loading-indicator").style.display = "none";
+    }
+
+    // Send message to the backend and get response
+    function sendMessage() {
+      const userInput = document.getElementById("user-input").value;
+      if (userInput.trim() === "") return;
+
+      appendMessage(userInput, "user"); // Show user's message in the chat
+      document.getElementById("user-input").value = ""; // Clear input box
+      showLoading(); // Show the loading indicator
+
+      fetch("{% url 'chatbot' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: `user_input=${userInput}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          appendMessage(data.response, "bot"); // Show bot's response
+          hideLoading(); // Hide the loading indicator
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          appendMessage("Sorry, I couldn't process your request.", "bot");
+          hideLoading();
+        });
+    }
+
+    // Allow pressing Enter to send message
+    document.getElementById("user-input").addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

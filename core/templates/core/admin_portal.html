@@ -236,9 +236,9 @@
 </div>
 
 <!-- Action Buttons -->
-<div>
+<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 10vh;">
     <button class="BUTTON" id="add_book_button" onclick="location.href='{% url 'add_book' %}'">Add Books</button>
-    <button class="BUTTON" id="buy_book" onclick="location.href='{% url 'buy_book' %}'">Buy Books</button>
+    
 </div>
 
 <!-- JavaScript Function to Populate Student Data -->
@@ -291,8 +291,8 @@
       
         
 
-        function displayBooks(books) {
-            const booksBody = document.getElementById("books-body");
+function displayBooks(books) {
+    const booksBody = document.getElementById("books-body");
     booksBody.innerHTML = ''; // Clear previous data
 
     books.forEach(book => {
@@ -300,20 +300,19 @@
         row.innerHTML = `
             <td>${book.title || 'N/A'}</td>
             <td>${book.author || 'N/A'}</td>
-           
             <td>${book.asin || 'N/A'}</td>
             <td>${book.rating || 'N/A'}</td>
         `;
         booksBody.appendChild(row);
     });
 
-    // If no books are found, show a message
     if (books.length === 0) {
         const row = document.createElement("tr");
-        row.innerHTML = `<td colspan="5">No books found</td>`;
+        row.innerHTML = `<td colspan="4">No books found</td>`;
         booksBody.appendChild(row);
     }
 }
+
     
 function searchBooks() {
     const searchTerm = document.getElementById("search-bar-books").value.trim().toLowerCase();
@@ -338,30 +337,30 @@ function searchBooks() {
     }
 
     function displayStudents(students) {
-        const studentsBody = document.getElementById("students-body");
-        studentsBody.innerHTML = ''; // Clear previous data
+    const studentsBody = document.getElementById("students-body");
+    studentsBody.innerHTML = ''; // Clear previous data
 
-        students.forEach(student => {
-            if (!student.is_staff) {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${student.name}</td>
-                    <td>${student.roll_number || 'N/A'}</td>
-                    <td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : 'N/A'}</td>
-                    <td>${new Date(student.date_joined).toLocaleDateString()}</td>
-                    <td>${student.email}</td>
-                `;
-                studentsBody.appendChild(row);
-            }
-        });
-
-        // If no students found, show a message
-        if (students.length === 0) {
+    students.forEach(student => {
+        if (!student.is_staff) {
             const row = document.createElement("tr");
-            row.innerHTML = `<td colspan="5">No students found</td>`;
+            row.innerHTML = `
+                <td>${student.name || 'N/A'}</td>
+                <td>${student.roll_number || 'N/A'}</td>
+                <td>${student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : 'N/A'}</td>
+                <td>${new Date(student.date_joined).toLocaleDateString()}</td>
+                <td>${student.email || 'N/A'}</td>
+            `;
             studentsBody.appendChild(row);
         }
+    });
+
+    if (students.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="5">No students found</td>`;
+        studentsBody.appendChild(row);
     }
+}
+
 
     
     function hideAllStudents() {
